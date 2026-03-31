@@ -1,0 +1,45 @@
+"Random Forest 模型架構"
+
+主程式流程 (main)
+├─ 1. 輸入 Victim ID
+├─ 2. 讀取 Victim 資料 (get_victim_file → read_featuredata)
+│    └─ 移除缺失值、補全欄位結構
+├─ 3. 將 Victim 資料分割為 train/test
+├─ 4. 讀取所有其他 Victim 資料作為 Negative Training Data
+│    └─ get_all_negative_data → read_featuredata
+├─ 5. 讀取對應 Attacker 資料作為 Negative Testing Data
+│    └─ get_attacker_negative_data → read_featuredata
+├─ 6. 模型訓練 train_model
+│    ├─ concat Positive + Negative 資料
+│    ├─ 指定 label 為文字 "positive"/"negative"
+│    └─ 使用 RandomForestClassifier 訓練（含 class_weight 調整）
+├─ 7. 模型測試 test_model
+│    ├─ concat Positive + Negative 測試資料
+│    └─ 輸出 classification_report
+├─ 8. 將結果寫入 log 檔案
+
+
+"LSTM 模型架構"
+
+
+主程式流程 (main)
+├─ 1. 輸入 Victim ID
+├─ 2. 讀取 Victim 資料 (get_victim_file → read_featuredata)
+│    └─ 移除缺失值、補全欄位結構
+├─ 3. 將 Victim 資料分割為 train/test
+├─ 4. 讀取所有其他 Victim 資料作為 Negative Training Data
+│    └─ get_all_negative_data → 隨機抽樣與 Positive 等量之樣本。
+├─ 5. 讀取對應 Attacker 資料作為 Negative Testing Data
+│    └─ get_attacker_negative_data → 針對該 Victim 的攻擊者行為資料
+├─ 6. 模型訓練 train_model
+│    ├─ 資料預處理：使用 StandardScaler 進行特徵標準化
+│    ├─ 張量轉換：將資料轉換為 torch.float32 格式的 Tensor
+│    ├─ 計算 pos_weight：根據正負樣本比例計算權重，以應對資料不平衡。
+│    ├─ 損失函數與優化器：使用 BCEWithLogitsLoss（含 pos_weight）與 Adam 優化器
+│    └─ 執行訓練：迭代 100 個 Epoch 進行網路權重更新
+├─ 7. 模型測試 test_model
+│    ├─ 套用標準化：使用訓練階段的 scaler 處理測試資料
+│    ├─ 門檻值過濾：設定 threshold=0.4 來判定最終分類結果
+│    └─ 輸出結果：產生 classification_report
+├─ 8. 將結果寫入 log 檔案
+
